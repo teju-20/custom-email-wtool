@@ -1,0 +1,14 @@
+### Get all emails
+GET http://localhost:5000/emails
+Accept: application/json
+
+### Create a new email
+POST http://localhost:5000/emails
+Content-Type: application/json
+
+{
+  "To": "someone@example.com",
+  "subject": "Test Email",
+  "body": "Testing email API 🚀"
+}
+
