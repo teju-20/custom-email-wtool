@@ -1,20 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES2020",                              /* Use modern JS features */
-    "lib": ["ESNext"],                               /* Latest ECMAScript features */
-    "module": "commonjs",                            /* CommonJS for Node.js runtime */
-    "moduleResolution": "node",                      /* Node-style module resolution */
-    "resolveJsonModule": true,                       /* Allow importing JSON files */
-    "esModuleInterop": true,                         /* Interop between CommonJS and ES Modules */
-    "allowSyntheticDefaultImports": true,            /* Allow default imports from CJS modules */
-    "strict": true,                                  /* Enable all strict type checks */
-    "forceConsistentCasingInFileNames": true,        /* Prevent case mismatches */
-    "skipLibCheck": true,                            /* Skip type checking of d.ts files */
-    "isolatedModules": true,                         /* Ensure each file can be transpiled in isolation */
-    "allowJs": true,                                 /* Allow JS files in the project */
-    "noEmit": true,                                  /* Don't emit JS on build (ts-node will run directly) */
-    "jsx": "react-jsx"                               /* Keep for frontend compatibility */
+    "target": "ES2020",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "./src",
+    "paths": {
+      "*": ["*"]
+    },
+    "typeRoots": ["./node_modules/@types", "./src/express/types"]
   },
-  "include": ["src", "src/types/express/index.d.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*"]
 }

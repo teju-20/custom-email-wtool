@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { oauth2Client } from '../utils/google0auth';
-import User from '../models/User';
+import User from '../models/user';
 import jwt from 'jsonwebtoken';
 import { google } from 'googleapis';
 

@@ -1,12 +1,13 @@
-import { User } from "../../models/User"; // adjust path if needed
+// src/express/types/index.d.ts
+import 'express-serve-static-core';
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        email?: string;
-      };
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: {
+      id: string;
+      email: string;
+      // add any other fields you store in user
+    };
   }
 }
+export { Request } from 'express';

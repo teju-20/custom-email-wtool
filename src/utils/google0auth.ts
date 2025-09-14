@@ -1,22 +1,20 @@
-// src/utils/googleOAuth.ts
-import { google } from 'googleapis';
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
 
-export const oauth2Client = new google.auth.OAuth2(
-  process.env.OAUTH_CLIENT_ID!,
-  process.env.OAUTH_CLIENT_SECRET!,
-  process.env.OAUTH_REDIRECT_URI!
-);
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
-export const getAuthUrl = (): string => {
-  const scopes = [
-    'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile',
-    'https://www.googleapis.com/auth/gmail.readonly',
-  ];
-
-  return oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: scopes,
-    prompt: 'consent',
+export const sendMail = async (to: string, subject: string, text: string) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    text
   });
 };

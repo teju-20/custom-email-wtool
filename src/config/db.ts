@@ -1,30 +1,45 @@
-// src/config/db.ts
+import mongoose from "mongoose";
+import dotenv from "dotenv";                                                                                                  
+dotenv.config();
 
-// Option 1: Mocked DB connection (skip MongoDB)
-export const connectDB = async (): Promise<void> => {
-  console.log("⚠️ MongoDB skipped (mocked). Backend will run without DB.");
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/email-workflow";
+
+export const connectDB = async () => {
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log("MongoDB connected successfully ✅");
+  } catch (error) {
+    console.error("MongoDB connection failed ❌", error);
+    process.exit(1);
+  }
 };
 
-/* ------------------------------------------------------ */
-/* Option 2: If you want real MongoDB connection later,  */
-/* uncomment this and comment out the mocked version.    */
-/* ------------------------------------------------------ */
+controllers-emailController.ts
+import { Request, Response } from "express";
+import nodemailer from "nodemailer";
 
-// import mongoose from 'mongoose';
+export const sendEmail = async (req: Request, res: Response) => {
+  try {
+    const { to, subject, text } = req.body;
 
-// const MONGO_URI = process.env.MONGO_URI;
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-// if (!MONGO_URI) {
-//   console.error("❌ MONGO_URI is not defined in .env");
-//   process.exit(1);
-// }
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to,
+      subject,
+      text,
+    });
 
-// export const connectDB = async (): Promise<void> => {
-//   try {
-//     await mongoose.connect(MONGO_URI);
-//     console.log("✅ MongoDB connected successfully");
-//   } catch (error) {
-//     console.error("❌ MongoDB connection error:", error);
-//     process.exit(1);
-//   }
-// };
+    res.status(200).json({ message: "Email sent successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to send email", error });
+  }
+};

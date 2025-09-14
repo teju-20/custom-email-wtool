@@ -1,8 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 
-import emailRoutes from './routes/emailRoutes';
-import authRoutes from './routes/authRoutes';
+import emailRoutes from '. ./routes/emailRoutes';
+import authRoutes from '. ./routes/authRoutes';
 
 dotenv.config();
 

@@ -1,36 +1,59 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,  // use STARTTLS on port 587
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,    // Your Gmail address
-    pass: process.env.EMAIL_PASS,    // Your Gmail App Password
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
-// Function to send email
-export const sendEmail = async (to: string, subject: string, text: string) => {
-  try {
-    const mailOptions = {
-      from: `"Project Workflow" <${process.env.EMAIL_USER}>`,  // sender address
-      to,
-      subject,
-      text,
-    };
-
-    // Send mail
-    const info = await transporter.sendMail(mailOptions);
-
-    console.log('Email sent:', info.messageId);
-    return info;
-
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw error;
-  }
+const sendEmail = async (to: string, subject: string, text: string) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    text,
+  });
 };
+
+export default sendEmail;
+
+src-index.ts
+import express, {Request, Response} from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import emailRoutes from "./routes/emailRoutes";
+
+dotenv.config();
+
+const app = express(); // <- no type annotations here, let TS infer
+
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+
+// Routes
+app.use("/emails", emailRoutes);
+
+// Root endpoint
+app.get("/", (req: Request, res: Response) => {
+  res.status(200).json({ message: "Welcome to the Custom Email Workflow Tool API 🚀" });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+backend-ts
+\-.env
+PORT=5000
+EMAIL_USER=mack.schiller5@ethereal.email
+EMAIL_PASS=upqV692vdrxkSaGwRn

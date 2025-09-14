@@ -1,21 +1,26 @@
-import { google, gmail_v1 } from 'googleapis';
-import User from '../models/User';
+import nodemailer from "nodemailer";
 
-export const getGmailClientForUser = async (userId: string): Promise<gmail_v1.Gmail> => {
-  const user = await User.findById(userId);
-  if (!user) throw new Error('User not found');
+const transporter = nodemailer.createTransport({
+  host: "smtp.ethereal.email", // For test email using Ethereal
+  port: 587,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.OAUTH_CLIENT_ID!,
-    process.env.OAUTH_CLIENT_SECRET!,
-    process.env.OAUTH_REDIRECT_URI!
-  );
-
-  oauth2Client.setCredentials({
-    access_token: user.accessToken,
-    refresh_token: user.refreshToken,
-    expiry_date: user.tokenExpiry.getTime(),
-  });
-
-  return google.gmail({ version: 'v1', auth: oauth2Client });
+export const sendEmail = async (to: string, subject: string, text: string) => {
+  try {
+    const info = await transporter.sendMail({
+      from: `"Custom Email Tool" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      text
+    });
+    console.log("Email sent: ", info.messageId);
+    return info;
+  } catch (error) {
+    console.error("Error sending email: ", error);
+    throw error;
+  }
 };
