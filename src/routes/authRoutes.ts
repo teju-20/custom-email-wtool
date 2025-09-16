@@ -1,6 +1,6 @@
 // src/routes/emailRoutes.ts
 import { Router, Request, Response } from "express";
-import { sendEmail } from "../services/emailService";
+import { sendEmail } from "../services/gmailService";
 
 const router = Router();
 
@@ -41,3 +41,4 @@ router.post("/", async (req: Request, res: Response) => {
 router.get("/", (_req: Request, res: Response) => {
   res.status(200).json(emails);
 });
+export default router;

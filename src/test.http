@@ -3,12 +3,13 @@ GET http://localhost:5000/emails
 Accept: application/json
 
 ### Create a new email
-POST http://localhost:5000/emails
+POST http://localhost:5000/api/send-email
 Content-Type: application/json
 
 {
-  "To": "someone@example.com",
-  "subject": "Test Email",
-  "body": "Testing email API 🚀"
+  "to": "yourgmail@gmail.com",
+  "subject": "Hello",
+  "text": "This is a test email"
 }
+
 

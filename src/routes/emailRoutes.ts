@@ -1,9 +1,12 @@
-import { Router } from 'express';
-import { listEmails } from '../controllers/emailController';
-import { authenticate } from '../middlewares/auth';
+import { Router } from "express";
+import { fetchEmails } from "../controllers/emailController";
 
 const router = Router();
 
-router.get('/', authenticate, listEmails);
+// POST /api/send-email
+// router.post("/send-email", sendEmail);
+
+// GET /api/fetch-emails
+router.get("/fetch-emails", fetchEmails);
 
 export default router;

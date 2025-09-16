@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "target": "ES2020",                     // Modern JS output
+    "module": "commonjs",                   // Node.js modules
+    "outDir": "dist",                        // Compiled JS goes here
+    "rootDir": "src",                        // Source TS files
+    "strict": true,                          // Enable all strict type checks
+    "esModuleInterop": true,                 // Needed for imports like 'import express from "express"'
+    "skipLibCheck": true,                    // Skip type checking of node_modules
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": "./src",
+    "baseUrl": "./src",                      // For absolute imports from src
     "paths": {
       "*": ["*"]
-    },
-    "typeRoots": ["./node_modules/@types", "./src/express/types"]
+     },
+    "jsx": "react-jsx"
   },
   "include": ["src/**/*"]
 }
