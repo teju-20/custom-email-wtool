@@ -1,46 +1,49 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import emailRoutes from "./routes/emailRoutes";
 import cors from "cors";
-import aiRoutes from "./routes/aiRoutes";
-import gmailRoutes from "./routes/gmailRoutes";
+import path from "path";
+
+import emailRoutes from "./routes/emailRoutes";
 
 dotenv.config();
 
 const app = express();
 
-app.use("/api/gmail", gmailRoutes);
-
-app.use("/api", aiRoutes);
-
+// Enable CORS
 app.use(cors());
 
-// Middleware to parse JSON
+// JSON middleware
 app.use(express.json());
 
+// API Routes
+app.use("/api/emails", emailRoutes);
+
 // Health check
-app.get("/api", (_req, res) => {
-  res.send("✅ API is working!");
+app.get("/api", (_req: Request, res: Response) => res.send("✅ API is working!"));
+
+// Serve React build
+const buildPath = path.join(__dirname, "../frontend/build");
+app.use(express.static(buildPath));
+
+// Redirect non-API requests to React app
+app.get(/^\/(?!api).*/, (_req: Request, res: Response) => {
+  res.sendFile(path.join(buildPath, "index.html"));
 });
 
-// Mount email routes
-app.use("/api", emailRoutes);
-
 // Global error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Global error handler:", err.stack);
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error("❌ Global error handler:", err.stack || err);
   res.status(500).json({ message: "Internal Server Error" });
 });
 
-// Connect to MongoDB
+// MongoDB connection
+const mongoUri = process.env.MONGO_URI || "";
 mongoose
-  .connect(process.env.MONGO_URI || "")
-  .then(() => console.log("✅ MongoDB connected successfully"))
+  .connect(mongoUri)
+  .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

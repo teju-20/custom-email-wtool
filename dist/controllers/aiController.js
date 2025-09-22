@@ -8,14 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendEmail = void 0;
-const axios_1 = __importDefault(require("axios"));
-const sendEmail = (to, subject, text) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield axios_1.default.post("http://localhost:5000/api/send-email", { to, subject, text });
-    return response.data;
+exports.generateAIReply = void 0;
+// Dummy AI reply generator (replace with OpenAI or GPT API later)
+const generateAIReply = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { emailContent } = req.body;
+        if (!emailContent) {
+            return res.status(400).json({ message: "Email content missing" });
+        }
+        // Dummy reply suggestion
+        const reply = `Hello, thank you for your email. Regarding: "${emailContent}"`;
+        res.json({ reply });
+    }
+    catch (error) {
+        console.error("❌ Error generating AI reply:", error);
+        res.status(500).json({ message: "Failed to generate AI reply" });
+    }
 });
-exports.sendEmail = sendEmail;
+exports.generateAIReply = generateAIReply;

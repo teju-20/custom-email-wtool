@@ -1,104 +1,94 @@
 import React, { useEffect, useState } from "react";
 import { fetchEmails, Email } from "../api/EmailApi";
-import { sendEmail, SendEmailResponse } from "../api/EmailApi";
 import { getAIReply } from "../api/aiApi";
 
 interface Props {
-  userId: string;
+  emails: Email[];
+  setEmails: React.Dispatch<React.SetStateAction<Email[]>>;
 }
 
-const Inbox: React.FC<Props> = ({ userId }) => {
-  const [emails, setEmails] = useState<Email[]>([]);
+const Inbox: React.FC<Props> = ({ emails, setEmails }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
-  const [status, setStatus] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
 
+  // Load emails only if empty
   useEffect(() => {
-    const getEmails = async () => {
+    const loadEmails = async () => {
+      setLoading(true);
+      setError("");
       try {
-        setLoading(true);
-        const fetchedEmails = await fetchEmails();
-        setEmails(fetchedEmails);
-      } catch (err: any) {
-        console.error(err);
+        const data = await fetchEmails();
+        setEmails(data);
+      } catch (err) {
+        console.error("Failed to fetch emails", err);
         setError("Failed to fetch emails");
       } finally {
         setLoading(false);
       }
     };
-    getEmails();
-  }, [userId]);
 
-  const handleReply = async (to: string) => {
-    if (!to) return;
-    try {
-      const response: SendEmailResponse = await sendEmail(to, "Re: ", replyText);
-      setStatus(response.message);
-      setReplyText("");
-      setReplyingTo(null);
-    } catch (err) {
-      console.error(err);
-      setStatus("❌ Error sending reply");
-    }
+    if (emails.length === 0) loadEmails();
+  }, [emails.length, setEmails]);
+
+  const handleReply = (to: string, subject: string) => {
+    alert(`Reply sent to ${to} with subject: "${subject}"\nMessage: ${replyText}`);
+    setReplyingTo(null);
+    setReplyText("");
   };
 
-  const handleSuggestReply = async (emailContent: string) => {
-    if (!emailContent) return;
+  const handleSuggestReply = async (snippet: string) => {
     try {
       setAiLoading(true);
-      const aiReply = await getAIReply(emailContent);
-      setReplyText(aiReply);
+      const suggestion = await getAIReply(snippet || "");
+      setReplyText(suggestion);
     } catch (err) {
-      console.error(err);
-      setStatus("❌ AI suggestion failed");
+      console.error("AI suggestion failed", err);
+      alert("AI suggestion failed");
     } finally {
       setAiLoading(false);
     }
   };
 
-  if (loading) return <div>Loading emails...</div>;
-  if (error) return <div>{error}</div>;
-
   return (
-    <div>
+    <div style={{ marginTop: 20 }}>
       <h2>Inbox</h2>
-      {emails.length === 0 && <div>No emails found.</div>}
-      <ul>
-        {emails.map((email) => (
-          <li
-            key={email.id}
-            style={{
-              marginBottom: "10px",
-              borderBottom: "1px solid #ccc",
-              paddingBottom: 5,
-            }}
-          >
-            <strong>From:</strong> {email.from} <br />
-            <strong>Subject:</strong> {email.subject} <br />
-            <strong>Date:</strong> {email.date} <br />
-            <strong>Snippet:</strong> {email.snippet} <br />
-            <button onClick={() => setReplyingTo(email.from)}>Reply</button>
 
-            {replyingTo === email.from && (
-              <div style={{ marginTop: 5 }}>
+      {loading && <p>Loading emails...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      <ul>
+        {emails.map((email, index) => (
+          <li
+            key={email.id || index}
+            style={{ marginBottom: 15, borderBottom: "1px solid #ccc", padding: 10 }}
+          >
+            <strong>From:</strong> {email.from || "Unknown"} <br />
+            <strong>Subject:</strong> {email.subject || "(No subject)"} <br />
+            <strong>Snippet:</strong> {email.snippet || "(No content)"} <br />
+
+            <button onClick={() => setReplyingTo(email.id || "")}>Reply</button>
+
+            {replyingTo === email.id && (
+              <div style={{ marginTop: 10 }}>
                 <textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Type your reply"
                   rows={3}
-                  style={{ width: "100%" }}
+                  cols={40}
                 />
                 <div style={{ marginTop: 5 }}>
-                  <button onClick={() => handleReply(email.from)}>Send Reply</button>
+                  <button onClick={() => handleReply(email.from || "", email.subject || "")}>
+                    Send Reply
+                  </button>
                   <button
-                    onClick={() => handleSuggestReply(email.snippet)}
+                    onClick={() => handleSuggestReply(email.snippet || "")}
                     disabled={aiLoading}
                     style={{ marginLeft: 5 }}
                   >
-                    {aiLoading ? "Suggesting..." : "Suggest Reply"}
+                    {aiLoading ? "Generating..." : "Suggest Reply"}
                   </button>
                 </div>
               </div>
@@ -106,7 +96,6 @@ const Inbox: React.FC<Props> = ({ userId }) => {
           </li>
         ))}
       </ul>
-      <div>{status}</div>
     </div>
   );
 };

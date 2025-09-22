@@ -3,6 +3,7 @@ import { generateAIReply } from "../controllers/aiController";
 
 const router = Router();
 
-router.post("/ai-reply", generateAIReply);
+// ✅ Generate AI reply
+router.post("/reply", generateAIReply);
 
 export default router;

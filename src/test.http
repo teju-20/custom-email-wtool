@@ -3,7 +3,7 @@ GET http://localhost:5000/emails
 Accept: application/json
 
 ### Create a new email
-POST http://localhost:5000/api/send-email
+POST http://localhost:5000/api/fetch-emails
 Content-Type: application/json
 
 {

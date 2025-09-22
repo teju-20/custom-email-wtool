@@ -1,9 +1,8 @@
-import { Router } from "express";
-import { fetchEmails } from "../controllers/GmailController";
+import express from "express";
+import { getInbox } from "../controllers/GmailController";
 
-const router = Router();
+const router = express.Router();
 
-// Fetch inbox emails
-router.get("/emails", fetchEmails);
+router.get("/inbox", getInbox);
 
 export default router;

@@ -1,13 +1,20 @@
 import { Request, Response } from "express";
 
-// For production, integrate OpenAI API here
+// Dummy AI reply generator (replace with OpenAI or GPT API later)
 export const generateAIReply = async (req: Request, res: Response) => {
-  const { emailContent } = req.body;
+  try {
+    const { emailContent } = req.body;
 
-  if (!emailContent) return res.status(400).json({ message: "Email content missing" });
+    if (!emailContent) {
+      return res.status(400).json({ message: "Email content missing" });
+    }
 
-  // Example placeholder reply
-  const aiReply = `Hello, thank you for your email. Regarding: "${emailContent}"`;
+    // Dummy reply suggestion
+    const reply = `Hello, thank you for your email. Regarding: "${emailContent}"`;
 
-  return res.json({ reply: aiReply });
+    res.json({ reply });
+  } catch (error) {
+    console.error("❌ Error generating AI reply:", error);
+    res.status(500).json({ message: "Failed to generate AI reply" });
+  }
 };

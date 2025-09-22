@@ -1,16 +1,30 @@
+// sendemail.ts
 import nodemailer from "nodemailer";
 
-export const sendEmail = async (to: string, subject: string, text: string) => {
+/**
+ * Sends an email using Nodemailer configured with Gmail SMTP.
+ * 
+ * @param to Recipient email address
+ * @param subject Email subject line
+ * @param text Text body of the email
+ * @returns Promise resolving to a message indicating success or failure
+ */
+export const sendemail = async (
+  to: string,
+  subject: string,
+  text: string
+): Promise<{ message: string }> => {
   try {
-    // Configure transporter with your Gmail or SMTP credentials
+    // Create reusable transporter object using Gmail SMTP
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER,   // your Gmail address
-        pass: process.env.EMAIL_PASS,   // app password, not your real Gmail password
+        user: process.env.EMAIL_USER, // Your Gmail address (must be set in .env)
+        pass: process.env.EMAIL_PASS, // App password generated in your Google account
       },
     });
 
+    // Setup email data
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to,
@@ -18,6 +32,7 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
       text,
     };
 
+    // Send email
     const info = await transporter.sendMail(mailOptions);
     console.log("✅ Email sent:", info.response);
 

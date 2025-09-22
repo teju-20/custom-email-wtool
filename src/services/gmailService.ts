@@ -1,46 +1,57 @@
-// src/services/emailService.ts
-import nodemailer, { Transporter } from "nodemailer";
+import { google } from "googleapis";
 import dotenv from "dotenv";
 
-dotenv.config(); // load .env variables
+dotenv.config();
 
-// Validate environment variables
-if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-  console.error("❌ EMAIL_USER and EMAIL_PASS must be defined in .env");
-  process.exit(1);
-}
+// OAuth2 client setup using your .env variables
+const oAuth2Client = new google.auth.OAuth2(
+  process.env.OAUTH_CLIENT_ID,
+  process.env.OAUTH_CLIENT_SECRET,
+  process.env.OAUTH_REDIRECT_URI
+);
 
-// Create transporter for Ethereal (test emails)
-const transporter: Transporter = nodemailer.createTransport({
-  host: "smtp.ethereal.email", // You can change this to Gmail/other SMTP later
-  port: 587,
-  secure: false, // use TLS, not SSL
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+// Set your refresh token
+oAuth2Client.setCredentials({
+  refresh_token: process.env.EMAIL_PASS // Or if you have a separate refresh token, use it here
 });
 
-// Function to send emails
-export const sendEmail = async (
-  to: string,
-  subject: string,
-  text: string
-): Promise<nodemailer.SentMessageInfo> => {
+// Gmail API instance
+const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
+
+export const fetchEmails = async () => {
   try {
-    const info = await transporter.sendMail({
-      from: `"Custom Email Tool" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      text,
+    const res = await gmail.users.messages.list({
+      userId: "me",
+      maxResults: 10, // fetch latest 10 emails
+      labelIds: ["INBOX"],
     });
 
-    console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
-    console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`); // works with Ethereal
+    const messages = res.data.messages || [];
 
-    return info;
+    const emailDetails = await Promise.all(
+      messages.map(async (msg) => {
+        const email = await gmail.users.messages.get({
+          userId: "me",
+          id: msg.id!,
+        });
+
+        const headers = email.data.payload?.headers || [];
+        const from = headers.find((h) => h.name === "From")?.value || "";
+        const subject = headers.find((h) => h.name === "Subject")?.value || "";
+        const snippet = email.data.snippet || "";
+
+        return {
+          id: msg.id,
+          from,
+          subject,
+          snippet,
+        };
+      })
+    );
+
+    return emailDetails;
   } catch (error) {
-    console.error("❌ Error sending email:", error);
+    console.error("Gmail fetch error:", error);
     throw error;
   }
 };

@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ES2020",                     // Modern JS output
     "module": "commonjs",                   // Node.js modules
-    "outDir": "dist",                        // Compiled JS goes here
-    "rootDir": "src",                        // Source TS files
+    "outDir": "./dist",                        // Compiled JS goes here
+    "rootDir": "./src",                        // Source TS files
     "strict": true,                          // Enable all strict type checks
     "esModuleInterop": true,                 // Needed for imports like 'import express from "express"'
     "skipLibCheck": true,                    // Skip type checking of node_modules

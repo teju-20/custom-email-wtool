@@ -1,12 +1,24 @@
-import { Router } from "express";
-import { fetchEmails } from "../controllers/emailController";
+import { Router, Request, Response, NextFunction } from "express";
+import { fetchEmails, sendEmail } from "../controllers/emailController";
 
 const router = Router();
 
-// POST /api/send-email
-// router.post("/send-email", sendEmail);
+// ✅ Fetch emails
+router.get("/fetch-emails", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await fetchEmails(req, res);
+  } catch (error) {
+    next(error);
+  }
+});
 
-// GET /api/fetch-emails
-router.get("/fetch-emails", fetchEmails);
+// ✅ Send email
+router.post("/send-email", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await sendEmail(req, res);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { sendEmail } from "./components/SendEmail";
+import SendEmail from "./components/SendEmail";
 import EmailList from "./components/EmailList";
 
 const App: React.FC = () => {

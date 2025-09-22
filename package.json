@@ -4,7 +4,7 @@
   "description": "Custom Email Workflow Tool",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --require tsconfig-paths/register ./src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules src/index.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "jest --coverage"

@@ -1,27 +1,46 @@
 import { Request, Response } from "express";
 
-export const fetchEmails = async (_req: Request, res: Response) => {
+// 📩 Fetch emails (dummy)
+export const fetchEmails = async (_req: Request, res: Response): Promise<void> => {
   try {
-    // Dummy emails for testing
     const emails = [
       {
         id: "1",
-        from: "alice@example.com",
-        subject: "Hello!",
-        snippet: "Hi, how are you?",
-        date: "2025-09-16",
+        from: "test@example.com",
+        subject: "Hello",
+        snippet: "This is a test email.",
+        date: new Date().toISOString(),
       },
       {
         id: "2",
-        from: "bob@example.com",
-        subject: "Meeting",
-        snippet: "Can we schedule a meeting?",
-        date: "2025-09-15",
+        from: "bot@example.com",
+        subject: "Update",
+        snippet: "AI-powered workflow update.",
+        date: new Date().toISOString(),
       },
     ];
-    res.json(emails);
-  } catch (err) {
-    console.error(err);
+
+    res.status(200).json(emails);
+  } catch (error) {
+    console.error("❌ Error fetching emails:", error);
     res.status(500).json({ message: "Failed to fetch emails" });
+  }
+};
+
+// 📤 Send email (dummy)
+export const sendEmail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { to, subject, text } = req.body;
+
+    if (!to || !subject || !text) {
+      res.status(400).json({ message: "Missing required fields: to, subject, or text" });
+      return;
+    }
+
+    console.log(`📧 Sending email to: ${to}, Subject: ${subject}, Text: ${text}`);
+    res.status(200).json({ message: "Email sent successfully (dummy)" });
+  } catch (error) {
+    console.error("❌ Error sending email:", error);
+    res.status(500).json({ message: "Failed to send email" });
   }
 };

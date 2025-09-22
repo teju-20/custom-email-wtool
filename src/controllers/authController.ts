@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { oauth2Client } from '../utils/google0auth';
-import User from '../models/user';
+import User, { IUser } from '../models/user'; // Assume IUser interface is exported here
 import jwt from 'jsonwebtoken';
 import { google } from 'googleapis';
 
-export const login = (req: Request, res: Response): void => {
+export const login = (_req: Request, res: Response): void => {
   res.json({ message: 'Login successful' });
 };
 
@@ -12,16 +12,16 @@ export const handleGoogleCallback = async (req: Request, res: Response): Promise
   const code = req.query.code as string;
 
   if (!code) {
-    res.status(400).json({ message: 'Code not provided' });
+    res.status(400).json({ message: 'Authorization code not provided' });
     return;
   }
 
   try {
-    // Get tokens from Google
+    // Exchange authorization code for tokens
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
-    // Get user info
+    // Fetch user profile info with valid OAuth2 client
     const oauth2 = google.oauth2({ auth: oauth2Client, version: 'v2' });
     const { data } = await oauth2.userinfo.get();
 
@@ -30,35 +30,43 @@ export const handleGoogleCallback = async (req: Request, res: Response): Promise
       return;
     }
 
-    // Find or create user
-    let user = await User.findOne({ email: data.email });
+    // Check if user exists in database
+    let user: IUser | null = await User.findOne({ email: data.email });
+
     const expiryDate = tokens.expiry_date ? new Date(tokens.expiry_date) : new Date(Date.now() + 3600 * 1000);
 
     if (!user) {
-      user = new User({
+      // Create new user document if not found
+      const newUser = new User({
         email: data.email,
         accessToken: tokens.access_token ?? '',
         refreshToken: tokens.refresh_token ?? '',
         tokenExpiry: expiryDate,
       });
+
+      user = await newUser.save();
     } else {
+      // Update existing user tokens if provided
       user.accessToken = tokens.access_token ?? user.accessToken;
       user.refreshToken = tokens.refresh_token ?? user.refreshToken;
       user.tokenExpiry = expiryDate;
+      await user.save();
     }
 
-    await user.save();
-
-    // Generate JWT token
+    // Create JWT token for client sessions
     const jwtToken = jwt.sign(
-      { id: user.id },
+      { id: user._id },
       process.env.JWT_SECRET || 'secret',
       { expiresIn: '1d' }
     );
 
-    res.json({ accessToken: jwtToken, user: { id: user.id, email: user.email } });
+    res.json({ accessToken: jwtToken, user: { id: user._id, email: user.email } });
   } catch (error) {
     console.error('OAuth callback error:', error);
-    res.status(500).json({ message: 'OAuth callback error', error });
+    res.status(500).json({ message: 'Error processing OAuth callback', error: error instanceof Error ? error.message : error });
   }
 };
+export const logout = (_req: Request, res: Response): void => {
+  // Invalidate JWT token on client side (handled in frontend)
+  res.json({ message: 'Logout successful' });
+}
